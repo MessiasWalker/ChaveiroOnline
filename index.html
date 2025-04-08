@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chaveiros Personalizados</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f4f4; }
+    header { background: #333; color: #fff; padding: 1rem; text-align: center; }
+    .container { padding: 1rem; max-width: 900px; margin: auto; }
+    .produtos { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
+    .produto { background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .produto img { max-width: 100%; border-radius: 6px; height: 150px; object-fit: cover; }
+    .produto button { margin-top: 0.5rem; padding: 0.5rem; width: 100%; background: #333; color: white; border: none; cursor: pointer; }
+    .carrinho, .formulario { background: #fff; padding: 1rem; margin-top: 2rem; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .carrinho ul { list-style: none; padding: 0; }
+    .carrinho li { margin-bottom: 0.5rem; }
+    input, textarea { width: 100%; padding: 0.5rem; margin-top: 0.5rem; margin-bottom: 1rem; border: 1px solid #ccc; border-radius: 4px; }
+    button.finalizar { background: green; }
+    .aviso { color: red; font-size: 0.9rem; margin-bottom: 1rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Chaveiros de Animes e Desenhos</h1>
+    <p>Entrega apenas em Brasília - DF | R$27 cada | Frete incluso</p>
+  </header>
+  <div class="container">
+    <section class="produtos" id="produtos"></section>
+
+    <section class="carrinho">
+      <h2>Carrinho</h2>
+      <ul id="lista-carrinho"></ul>
+      <p><strong>Total:</strong> R$ <span id="total">0.00</span></p>
+    </section>
+
+    <section class="formulario">
+      <h2>Seus Dados</h2>
+      <input type="text" id="nome" placeholder="Nome completo" required />
+      <input type="text" id="telefone" placeholder="Telefone com DDD" required />
+      <textarea id="endereco" placeholder="Endereço completo (Brasília - DF)" required></textarea>
+      <div class="aviso" id="aviso"></div>
+      <button class="finalizar" onclick="finalizarPedido()">Finalizar Pedido via WhatsApp</button>
+    </section>
+  </div>
+
+  <script>
+    const produtos = [
+      "Chaveiro Mulher Maravilha", "Chaveiro Batman", "Chaveiro Ursinho",
+      "Chaveiro Mulher Incrível", "Chaveiro Capivara", "Chaveiro Stitch",
+      "Chaveiro Naruto", "Chaveiro Goku", "Chaveiro One Piece",
+      "Chaveiro Pikachu", "Chaveiro Sailor Moon", "Chaveiro Homem-Aranha",
+      "Chaveiro Deadpool", "Chaveiro Scooby-Doo", "Chaveiro Pateta",
+      "Chaveiro Bob Esponja", "Chaveiro Hello Kitty", "Chaveiro Rick and Morty",
+      "Chaveiro Luffy", "Chaveiro Zoro"
+    ];
+
+    const carrinho = [];
+    const precoPorUnidade = 27;
+
+    function carregarProdutos() {
+      const area = document.getElementById("produtos");
+      produtos.forEach((nome, i) => {
+        const div = document.createElement("div");
+        div.className = "produto";
+        div.innerHTML = `
+          <img src="https://via.placeholder.com/200?text=Chaveiro+${i + 1}" alt="${nome}">
+          <h3>${nome}</h3>
+          <p>R$ 27,00</p>
+          <button onclick="adicionarCarrinho('${nome}')">Adicionar ao carrinho</button>
+        `;
+        area.appendChild(div);
+      });
+    }
+
+    function adicionarCarrinho(nome) {
+      carrinho.push({ nome, preco: precoPorUnidade });
+      atualizarCarrinho();
+    }
+
+    function atualizarCarrinho() {
+      const lista = document.getElementById('lista-carrinho');
+      lista.innerHTML = '';
+      let total = 0;
+
+      carrinho.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = `${item.nome} - R$ ${item.preco.toFixed(2)}`;
+        lista.appendChild(li);
+        total += item.preco;
+      });
+
+      // Aplicar desconto de R$6 se tiver mais de 4 chaveiros
+      if (carrinho.length > 4) total -= 6;
+
+      document.getElementById('total').textContent = total.toFixed(2);
+    }
+
+    function finalizarPedido() {
+      const nome = document.getElementById('nome').value.trim();
+      const telefone = document.getElementById('telefone').value.trim();
+      const endereco = document.getElementById('endereco').value.trim();
+      const aviso = document.getElementById('aviso');
+      aviso.textContent = '';
+
+      if (!nome || !telefone || !endereco) {
+        aviso.textContent = 'Por favor, preencha todos os campos.';
+        return;
+      }
+
+      if (!endereco.toLowerCase().includes('brasília') && !endereco.toLowerCase().includes('df')) {
+        aviso.textContent = 'Só entregamos em Brasília - DF.';
+        return;
+      }
+
+      const itens = carrinho.map(item => `${item.nome} - R$ ${item.preco.toFixed(2)}`).join('\n');
+      let total = carrinho.reduce((soma, item) => soma + item.preco, 0);
+      if (carrinho.length > 4) total -= 6;
+
+      const mensagem = `Olá! Gostaria de fazer um pedido:\n\n${itens}\n\nTotal: R$ ${total.toFixed(2)}\n\nNome: ${nome}\nTelefone: ${telefone}\nEndereço: ${endereco}`;
+      const url = `https://wa.me/5561993921854?text=${encodeURIComponent(mensagem)}`;
+      window.open(url, '_blank');
+    }
+
+    window.onload = carregarProdutos;
+  </script>
+</body>
+</html>
